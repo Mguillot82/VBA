@@ -1,0 +1,46 @@
+' Macro pour transformer du excel en JSON
+Sub excelToJsonFile()
+
+Dim excelRange As Range
+Dim jsonItems As New Collection
+Dim jsonDictionary As New Dictionary
+' Ci dessous, permet d'accéder au FileSystemObject qui permet de créer de nouveaux fichiers et de les sauvegarder dans un dossier.
+Dim jsonFileObject As New FileSystemObject
+' Ci-dessous , permet d'écrire du texte dans un fichier. En l'occurrence, du JSON dans le fichier.
+Dim jsonFileExport As TextStream
+
+Dim i As Long
+Dim cell As Variant
+
+' Déterminer la taille de la plage de cellules où la donnée est.
+Set excelRange = Cells(1, 1).CurrentRegion
+
+' clé : sub_category, skin_name, skin_img_url, skin_display_name
+
+' Converti chaque ligne du format excel vers le format JSON hors header.
+' Ecrit chaque ligne transformée en JSON dans un dictionnaire.
+' Ecrit le dictionnaire dans la collection.
+' Efface les données présentes dans le dictionnaire.
+' Répète l'opération pour l'ensemble des lignes présentes dans la plage.
+
+For i = 2 To excelRange.Rows.Count
+
+    jsonDictionary("sub_category") = Cells(i, 1)
+    jsonDictionary("skin_name") = Cells(i, 2)
+    jsonDictionary("skin_img_url") = Cells(i, 3)
+    jsonDictionary("skin_display_name") = Cells(i, 5)
+
+    jsonItems.Add jsonDictionary
+    Set jsonDictionary = Nothing
+
+Next i
+
+' Créé un nouveau fichier JSON dans la location spécifiée avec le nom "skins_data.json". True autorise l'overwrite, False l'empêche.
+Set jsonFileExport = jsonFileObject.CreateTextFile("C:\Users\matgu\Desktop\skins_data.json", False)
+' Ecrit le JSON converti dans le fichier.
+jsonFileExport.WriteLine (JsonConverter.ConvertToJson(jsonItems, Whitespace:=3))
+
+' Permet d'afficher la collection de dictionnaires. Ne pas utiliser si trop de lignes. Permet de voir si ça fonctionne.
+' MsgBox JsonConverter.ConvertToJson(jsonItems, Whitespace:=3)
+
+End Sub
