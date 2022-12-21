@@ -1,0 +1,104 @@
+' Macro qui a pour but de mettre à jour le compte de résultat dans la colonne C à partir de la référence déterminée en B.
+' En allant chercher dans les 12 feuilles du classeur, les valeurs correspondant aux référence.
+' puis en en faisant la somme pour l'ajouter dans la case correspondant à la référence en colonne C
+
+
+' La première étape consiste donc à récupérer les références. Attention, les références sont sous forme de texte.
+' Deuxième étape : Pour une référence donnée, effectuer la recherche dans une feuille donnée pour incrémenter d'une ou plusieurs valeurs correspondant à la référence.
+' Boucler sur les feuilles suivantes (1 - 12) en incrémentant à chaque fois des valeurs correspondantes jusqu'à obtenir la somme totale.
+' Mettre à jour la cellule de la colonne C correspondant à la colonne BSub Maj_cpte_resultat()
+
+Sub Maj_cpte_resultat()
+
+Application.ScreenUpdating = False
+
+Dim resultat As Long
+
+Dim references()
+
+references = Array("01", "02", "03", "11", "12", "13", "14", "15", "21", "21.1", "21.2", "21.3", "21.4", "21.5", _
+"22", "23", "23.1", "23.2", "24", "24.1", "24.2", "24.3", "24.4", "25", "41", "41.1", "42", "51", "52")
+
+
+
+For i = 0 To UBound(references) ' Boucle sur les index du tableau references
+    ref = references(i)           ' i est égal à la valeur de l'index correspondant
+    'ref = "13"
+    
+    For j = 2 To 13         ' Boucle sur les feuilles du classeur correspondant à chaque mois de l'année
+                                                            
+        Dim sht As Worksheet
+            
+        Dim StartCell As Range
+        Dim LastCell As Range
+        
+        Dim MStartCell As Range
+        Dim MLastCell As Range
+            
+        Dim LastRow As Long
+        Dim LastColumn As Long
+        Dim MLastColumn As Long
+                                   
+        Set sht = Worksheets(j)                                                ' Défini la feuille du classeur en fonction de j
+        Worksheets(j).Select
+                        
+        Set StartCell = Range("E6")                                            ' Détermine la première cellule de la plage de références à analyser.
+        Set MStartCell = Range("C6")                                           ' Détermine la première cellule de la plage des montants
+                                                  
+        LastRow = sht.Cells(StartCell.Row, StartCell.Column).End(xlDown).Row   ' Détermine la dernière ligne de la feuille
+        LastColumn = sht.Cells(StartCell.Column).Column                        ' Détermine la colonne des références de la feuille.
+        MLastColumn = sht.Cells(MStartCell.Column).Column                      ' Détermine la colonne des montants de la feuille.
+        
+        Set LastCell = Cells(LastRow, LastColumn)                              ' Détermine la dernière cellule de la plage de références à analyser
+        Set MLastCell = Cells(LastRow, MLastColumn)
+         
+        'Worksheets(j).Range(StartCell, LastCell).Select                       ' Sélectionne les références de la feuille.
+            
+        Dim RefPlage As Range
+        Dim MPlage As Range
+        Set RefPlage = Worksheets(j).Range(StartCell, LastCell)                ' Instancie la plage de référence
+        Set MPlage = Worksheets(j).Range(MStartCell, MLastCell)
+                 
+        Dim ref_temp As Variant                                                ' Tableau pour charger les références de la feuille
+        ref_temp = RefPlage.Value                                              ' Créé un tableau à deux dimension.
+                                                                               ' Méthode la plus rapide pour passer d'une plage à un tableau.
+        Dim m_temp As Variant                                                  ' Tableau(n,m) pour accéder aux valeurs. n représente les lignes, m les colonnes.
+        m_temp = MPlage.Value
+        
+            For k = 1 To UBound(ref_temp)                                          ' Boucle sur les index du tableau
+                m = ref_temp(k, 1)                                                 ' Charge la valeur de l'index correspondant dans k.
+                n = m_temp(k, 1)
+            
+                If m = ref Then
+            
+                    resultat = resultat + Abs(n)
+            
+                End If
+                
+            Next
+            
+    Next
+    
+    If resultat <> 0 Then
+            
+        For l = 23 To 80
+        
+            If ref = Worksheets("Synthese").Cells(l, 2).Value Then
+            
+                Worksheets("Synthese").Cells(l, 3) = resultat
+            
+            End If
+            
+        Next
+            
+    End If
+    
+    resultat = 0
+
+Next
+
+Worksheets("Synthese").Select
+
+End Sub
+
+
