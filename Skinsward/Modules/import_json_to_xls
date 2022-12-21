@@ -1,0 +1,30 @@
+' Macro pour importer du JSON dans excel
+Sub JsonToExcelExample()
+
+Dim jsonText As String
+Dim jsonObject As Object, item As Object
+Dim i As Long
+Dim ws As Worksheet
+
+' Cette feuille est utilisée pour à la fois lire la chaîne JSON et l'écrire lorsqu'elle est découpée.
+Set ws = Worksheets("JSON to Excel Example")
+
+' cette variable represente la chaîne de caractère au format valide JSON.
+jsonText = ws.Cells(1, 1)
+
+' appel d'une méthode du module importé JsonConverter (git hub : https://github.com/VBA-tools/VBA-JSON)
+' Analyse la chaine JSON importée et renvoie une collection de dictionnaires.
+Set jsonObject = JsonConverter.ParseJson(jsonText)
+
+i = 3
+
+ws.Cells(2, 1) = "Color"
+ws.Cells(2, 2) = "Hex Code"
+
+For Each item In jsonObject
+    ws.Cells(i, 1) = item("color")
+    ws.Cells(i, 2) = item("value")
+    i = i + 1
+Next
+
+End Sub
