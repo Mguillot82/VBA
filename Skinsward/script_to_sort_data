@@ -1,0 +1,245 @@
+Dim weapon_cat()
+Dim weapon_ref()
+
+' A partir d'une feuille "data", créé l'ensemble des feuilles représentant des tables d'une base de données :
+
+Sub Create_sName()
+
+Dim sName As String
+Dim cat As String
+Dim ref_cat As String
+' Tableau des catégorie d'armes
+'Dim weapon_cat(),
+Dim lastcol As Integer, i As Integer
+' Tableau des references d'armes par catégorie
+' Dim weapon_ref(),
+Dim lastrow As Integer, j As Integer
+Dim xfound As Boolean
+
+' Noms des colonnes de la feuille "data"
+table_col = Array("id", "type", "name", "collection", "image_url")
+lbound_tcol = LBound(table_col)
+ubound_tcol = UBound(table_col)
+tc_length = ubound_tcol - lbound_tcol + 1
+
+Worksheets("data").Select
+' Dernière colonne de la base de donnée et nombre de colonne du tableau
+lastcol = Cells(1, Columns.Count).End(xlToLeft).Column 'n° de la dernière colomne non vide de la ligne 1
+
+ReDim weapon_cat(1, lastcol)
+
+    For k = 1 To lastcol
+        weapon_cat(1, k) = Cells(1, k)
+        ' cat représente une catégorie
+        cat = weapon_cat(1, k)
+        
+        ' Dernière ligne de la base de donnée
+        lastrow = Cells(Rows.Count, k).End(xlUp).Row
+        ReDim weapon_ref(lastrow, k)
+        For l = 2 To lastrow
+            weapon_ref(l, k) = Cells(l, k)
+            ' ref_cat représente une référence d'une catégorie
+            ref_cat = weapon_ref(l, k)
+            ' sName correspond au nom d'une table de skin catégorie & référence
+            sName = CStr(k) + CStr(l - 1) + "_" + cat + "_" + ref_cat
+            ' Contrôle pour savoir si la feuille est déjà existante
+            On Error Resume Next
+            Sheets(sName).Select
+            xfound = (Err = 0)
+            On Error GoTo 0
+            If xfound = False Then
+                ' Ajoute une feuille au classeur de nom sName
+                Worksheets.Add(After:=Worksheets(Worksheets.Count)).name = sName
+                For m = 1 To tc_length
+                    ' Créé les noms de colonnes de la table
+                    Cells(1, m).Value = table_col(m - 1)
+                Next
+            Else:
+                For m = 1 To tc_length
+                    ' Créé les noms de colonnes de la table
+                    Cells(1, m).Value = table_col(m - 1)
+                Next
+            End If
+            
+            Worksheets("data").Select
+            
+        Next
+    Next
+
+
+End Sub
+Sub ID_fill()
+
+Dim nb_sheet As Integer
+Dim name As String
+Dim lastrow As Integer
+
+nb_sheet = Application.Sheets.Count
+
+For i = 1 To nb_sheet
+
+    name = Sheets(i).name
+    If name = "data" Then
+    Else
+        Worksheets(i).Select
+        lastrow = Cells(Rows.Count, 3).End(xlUp).Row
+        For j = 2 To lastrow
+            Cells(j, 1).Value = j - 1
+        Next
+    End If
+Next
+    
+
+End Sub
+Sub img_url_fill()
+
+Dim nb_sheet As Integer
+Dim name As String
+Dim lastrow As Integer
+Dim img_url As String
+
+nb_sheet = Application.Sheets.Count
+
+For i = 1 To nb_sheet
+
+    name = Sheets(i).name
+    If name = "data" Then
+    Else
+        Worksheets(i).Select
+        lastrow = Cells(Rows.Count, 3).End(xlUp).Row
+        For j = 2 To lastrow
+            img_url = Cells(j, 2).Value + "_" + Cells(j, 3) + ".png"
+            Cells(j, 5).Value = img_url
+        Next
+    End If
+Next
+
+End Sub
+Sub type_fill()
+
+Dim nb_sheet As Integer
+Dim name As String
+Dim lastrow As Integer
+Dim type_ As String
+Dim table_type As Variant
+
+nb_sheet = Application.Sheets.Count
+
+For i = 1 To nb_sheet
+
+    name = Sheets(i).name
+    table_type = Split(name, "_")
+    k = UBound(table_type)
+    
+    For l = 2 To k
+        type_ = type_ + table_type(l) + "_"
+    Next
+    On Error Resume Next
+    type_ = Left(type_, Len(type_) - 1)
+    
+    If name = "data" Then
+    Else
+        Worksheets(i).Select
+        lastrow = Cells(Rows.Count, 3).End(xlUp).Row
+        For j = 2 To lastrow
+            Cells(j, 2).Value = type_
+        Next
+        type_ = ""
+    End If
+Next
+
+
+End Sub
+Sub collection_fill()
+
+Dim nb_sheet As Integer
+Dim name As String
+Dim lastrow As Integer
+Dim collection As String
+Dim table_collection As Variant
+
+nb_sheet = Application.Sheets.Count
+
+For i = 1 To nb_sheet
+
+    name = Sheets(i).name
+    table_collection = Split(name, "_")
+    k = UBound(table_collection)
+    
+    For l = 2 To k
+        collection = collection + table_collection(l) + "_"
+    Next
+    
+    If name = "data" Then
+    Else
+    
+        x = Left(name, 1)
+        
+        If x < 5 Then
+        Else
+            collection = Left(collection, Len(collection) - 1)
+            Worksheets(i).Select
+            lastrow = Cells(Rows.Count, 3).End(xlUp).Row
+            
+            For j = 2 To lastrow
+                
+                Cells(j, 4).Value = collection
+            Next
+        End If
+        
+        
+        
+    End If
+    collection = ""
+Next
+
+
+
+End Sub
+
+' Contrôler l'existence d'une feuille avec un nom précis
+
+Sub test()
+
+Dim name As String
+Dim xfound As Boolean
+
+name = "data"
+
+On Error Resume Next
+
+Sheets(name).Select
+xfound = (Err = 0)
+On Error GoTo 0
+If xfound = False Then
+MsgBox ("n trouvé")
+Else: MsgBox ("trouve")
+End If
+
+
+
+End Sub
+
+' Sub Create_sName()
+
+' categorie = Array("pistol", "smgs", "rifle", "heavy", "melee")
+' type_1 = Array("mac-10", "mp9", "mp5", "mp7", "ump-45", "p90", "pp-bizon")
+' type_2 = Array("galil-ar", "famas", "ak-47", "m4a1s", "m4a4", "ssg-08", "sg-553", "aug", "awp", "g3sg1", "scar-20")
+' type_3 = Array("nova", "xm1014", "sawed-off", "mag-7", "m249", "negev")
+' type_4 = Array("gloves,knife")
+
+    ' For i = LBound(categorie) To UBound(categorie)
+        'Worksheets("data").Select
+        'j = i + 1
+        ' Cells(1, j).Value = categorie(i)
+    'Next
+
+' End Sub
+
+Sub CreateSheet()
+Dim sName As String
+
+    Sheets.Add After:=Worksheets(Worksheets.Count()).name = sName
+
+
+End Sub
