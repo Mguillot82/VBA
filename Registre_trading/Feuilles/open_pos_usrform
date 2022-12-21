@@ -1,0 +1,153 @@
+Private Sub UserForm_Initialize()       ' Initialise la procédure d'évènement pour l'open_pos_usrform
+
+' Déclarer les variables pour optimiser la rédaction des formules :
+
+Dim x As Double ' n titres
+Dim e As Double  ' prix d'entrée
+Dim s As Double  ' Stop loss
+Dim tp As Double ' Take profit
+Dim rrr As Double ' Risk Reward Ratio
+
+' Formater les valeurs textbox pour traitements futurs :
+
+unit_amount.Value = Format(x)
+Entry_price.Value = Format(e)
+Stop_loss.Value = Format(s)
+Take_profit.Value = Format(tp)
+Risk_reward_ratio.Value = Format(rrr)
+
+' Pour éviter d'avoir des 0 inscrits dans les textboxs au lancement initial :
+unit_amount.Value = ""
+Entry_price.Value = ""
+Stop_loss.Value = ""
+Take_profit.Value = ""
+Risk_reward_ratio.Value = ""
+
+' Load open_pos_usrform
+' open_pos_usrform.Show                   ' Affiche le formulaire à l'écran
+
+AddItemToEndList                      ' Charge les items de listes du formulaire
+
+Opening_date.Locked = True
+opening_hour.Locked = True
+Risk_reward_ratio.Locked = True
+
+Opening_date.Value = DateValue(Date)  ' Affiche la date dans la textbox ciblée
+opening_hour.Value = Time             ' Affiche l'heure dans la textbox ciblée
+
+End Sub
+Private Sub Entry_price_AfterUpdate()
+
+x = unit_amount.Value
+e = Entry_price.Value
+s = Stop_loss.Value
+tp = Take_profit.Value
+
+If e = 0 Or e = "" Then Exit Sub Else
+   If tp = 0 Or tp = "" Then Exit Sub Else
+        If s = 0 Or s = "" Then Exit Sub Else
+            If -s + e = 0 Then
+                MsgBox "Le prix d'entrée doit être différent du prix d'entrée."
+                Entry_price.Value = ""
+                Else
+                rrr = (tp - e) / (-s + e)
+                Risk_reward_ratio.Value = rrr
+            End If
+            
+End Sub
+Private Sub Stop_loss_AfterUpdate()
+
+x = unit_amount.Value
+e = Entry_price.Value
+s = Stop_loss.Value
+tp = Take_profit.Value
+
+If e = 0 Or e = "" Then Exit Sub Else
+   If tp = 0 Or tp = "" Then Exit Sub Else
+        If s = 0 Or s = "" Then Exit Sub Else
+            If -s + e = 0 Then
+                MsgBox "Le Stop Loss doit être différent du prix d'entrée."
+                Stop_loss.Value = ""
+                Else
+                rrr = (tp - e) / (-s + e)
+                Risk_reward_ratio.Value = rrr
+            End If
+                    
+End Sub
+Private Sub Take_profit_AfterUpdate()
+
+x = unit_amount.Value
+e = Entry_price.Value
+s = Stop_loss.Value
+tp = Take_profit.Value
+
+If e = 0 Or e = "" Then Exit Sub Else
+   If tp = 0 Or tp = "" Then Exit Sub Else
+        If s = 0 Or s = "" Then Exit Sub Else
+            If -s + e = 0 Then
+                MsgBox "Le Stop Loss doit être différent du prix d'entrée."
+                Stop_loss.Value = ""
+                Else
+                rrr = (tp - e) / (-s + e)
+                Risk_reward_ratio.Value = rrr
+            End If
+
+End Sub
+Private Sub register_open_pos_Click()
+
+' La cellule A1 de la feuille active obtient la valeur de la zone de texte nommée "TextBox_Nombre"
+' Range("A1")=TextBox_nombre.Value
+
+With Worksheets("Opened_positions")
+    .Rows(2).Insert xlShiftDown                ' Insère une ligne vierge sous la ligne d'en-tête en déplaçant la ligne 2 vers le bas
+    
+    .Range("A2") = Worksheets("Opened_positions").Cells(3, 1).Value + 1        ' Attribue un ID à la transaction
+    .Range("B2") = Currency_pair_list.Value     ' Insère les valeurs de listes rentrées dans le formulaire open_pos_usrform
+    .Range("C2") = Contrat_list.Value
+    .Range("D2") = Type_pos_list.Value
+    .Range("E2") = platform_list.Value
+    
+    .Range("F2") = Entry_price.Value            ' Insère les valeurs numériques rentrées dans le formulaire open_pos_usrform
+    .Range("G2") = unit_amount.Value
+    .Range("H2") = Leverage.Value
+    .Range("I2") = Take_profit.Value
+    .Range("J2") = Stop_loss.Value
+    .Range("K2") = Risk_reward_ratio.Value
+    
+    .Range("L2") = Opening_date.Value           ' Insère les valeurs date et heure définies dans le formulaire open_pos_usrform
+    .Range("M2") = opening_hour.Value
+    
+End With
+
+' Fermeture (Unload) de l'userform (Me)
+
+Unload open_pos_usrform
+End Sub
+
+Private Sub AddItemToEndList()         ' Avec en argument (listbox As listbox, ByVal StrItem As String) pour créer une fonction d'ajout
+                                       ' d'un item à une listbox. Si index (ordre de l'item dans la liste) non référencé, item se place en dernier
+With Currency_pair_list
+
+    .AddItem "BTCPerpetual / USDT"
+    '.AddItem
+
+End With
+
+Contrat_list.AddItem "Spot"
+Contrat_list.AddItem "Margin"
+Contrat_list.AddItem "Futures"
+
+Type_pos_list.AddItem "L0ng"
+Type_pos_list.AddItem "Short"
+
+With platform_list
+
+    .AddItem "Kraken"
+    .AddItem "Bitfinex"
+    .AddItem "Binance"
+    .AddItem "Kucoin"
+    
+End With
+
+End Sub
+
